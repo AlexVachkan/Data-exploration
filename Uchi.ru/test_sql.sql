@@ -48,7 +48,7 @@ order by count_task desc, count_solution_task desc
 --
 CREATE TABLE studs
 (st_id INT NOT NULL, -- ID ученика.
- subject TEXT NOT NULL --группа ученика.
+ test_grp TEXT NOT NULL --группа ученика.
 )
 
 --
@@ -77,7 +77,45 @@ COPY cheсks FROM
 'C:/Users_sql/checks.csv'
 WITH (FORMAT csv, header);
 
+--
+/* Необходимо в одном запросе выгрузить следующую информацию о группах пользователей:
+• ARPU
+• ARPAU
+• CR в покупку
+• СR активного пользователя в покупку
+• CR пользователя из активности по математике (subject = ’math’) в покупку курса по ма-
+тематике */
+--
+with active_users as -- опредеяем активных пользователей, кто купил программу 
+(with table_tes as 
+	(
+	select *,
+		case 
+			when correct is true then 1
+		else 0
+		end as correct_num
+	from peas_1
+	)
+select st_id, count(correct) as count_task, sum(correct_num) as count_solution_task
+from table_tes
+group by st_id 
+order by count_task desc, count_solution_task desc)
+select st_id
+from active_users
+where count_task>40
 
+
+select *
+from cheсks as c
+left join studs as s on c.st_id=s.st_id 
+
+
+select * 
+from cheсks as c
+left join studs as s on c.st_id=s.st_id
+group by c.st_id
 
 SELECT * FROM cheсks;
+SELECT * FROM studs;
+SELECT * FROM peas_1;
 DROP TABLE studs;
